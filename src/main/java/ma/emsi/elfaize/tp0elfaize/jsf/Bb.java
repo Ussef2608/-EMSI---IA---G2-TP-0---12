@@ -1,5 +1,6 @@
 package ma.emsi.elfaize.tp0elfaize.jsf;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
@@ -7,6 +8,10 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +58,12 @@ public class Bb implements Serializable {
     private StringBuilder conversation = new StringBuilder();
 
     /**
+     * Listes dynamiques des mots positifs et négatifs chargés depuis le fichier sentiments.txt.
+     */
+    private List<String> positifs = new ArrayList<>();
+    private List<String> negatifs = new ArrayList<>();
+
+    /**
      * Contexte JSF. Utilisé pour qu'un message d'erreur s'affiche dans le formulaire.
      */
     @Inject
@@ -62,6 +73,35 @@ public class Bb implements Serializable {
      * Obligatoire pour un bean CDI (classe gérée par CDI), s'il y a un autre constructeur.
      */
     public Bb() {
+    }
+
+    /**
+     * Chargement du dictionnaire de mots positifs/négatifs depuis le fichier sentiments.txt.
+     * Cette méthode est appelée automatiquement après la création du bean.
+     */
+    @PostConstruct
+    public void init() {
+        try (InputStream input = getClass().getResourceAsStream("/sentiments.txt");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input, java.nio.charset.StandardCharsets.UTF_8))) {
+
+            String ligne;
+            while ((ligne = reader.readLine()) != null) {
+                String[] parts = ligne.split(",");
+                if (parts.length == 2) {
+                    String mot = parts[0].trim().toLowerCase(Locale.FRENCH);
+                    String sentiment = parts[1].trim().toLowerCase(Locale.FRENCH);
+                    if (sentiment.equals("positif")) {
+                        positifs.add(mot);
+                    } else if (sentiment.equals("negatif")) {
+                        negatifs.add(mot);
+                    }
+                }
+            }
+            System.out.println("✅ Fichier sentiments.txt chargé : " + positifs.size() + " mots positifs, " + negatifs.size() + " négatifs.");
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+            System.err.println("⚠️ Erreur lors du chargement du fichier sentiments.txt");
+        }
     }
 
     public String getRoleSysteme() {
@@ -121,16 +161,42 @@ public class Bb implements Serializable {
             facesContext.addMessage(null, message);
             return null;
         }
-        // Entourer la réponse avec "||".
-        this.reponse = "||";
+
+        // Mon traitement personnalisé
+        String texte = question.toLowerCase(Locale.FRENCH);
+        boolean positifTrouve = false;
+        boolean negatifTrouve = false;
+
+        for (String mot : texte.split("\\s+")) {
+            mot = mot.replaceAll("[^a-zàâçéèêëîïôûùüÿñæœ]", "").trim();
+            if (mot.isEmpty()) continue;
+
+            if (positifs.contains(mot)) {
+                positifTrouve = true;
+            } else if (negatifs.contains(mot)) {
+                negatifTrouve = true;
+            }
+        }
+
+        if (positifTrouve && !negatifTrouve) {
+            this.reponse = "😊 Votre message semble positif.";
+        } else if (negatifTrouve && !positifTrouve) {
+            this.reponse = "😔 Votre message semble négatif.";
+        } else if (positifTrouve && negatifTrouve) {
+            this.reponse = "😐 Votre message contient à la fois des mots positifs et négatifs.";
+        } else {
+            this.reponse = "😐 Votre message semble neutre.";
+        }
+        // --- Fin du traitement personnalisé ---
+
         // Si la conversation n'a pas encore commencé, ajouter le rôle système au début de la réponse
         if (this.conversation.isEmpty()) {
             // Ajouter le rôle système au début de la réponse
-            this.reponse += roleSysteme.toUpperCase(Locale.FRENCH) + "\n";
+            this.reponse = "||" + roleSysteme.toUpperCase(Locale.FRENCH) + "||\n" + this.reponse;
             // Invalide le bouton pour changer le rôle système
             this.roleSystemeChangeable = false;
         }
-        this.reponse += question.toLowerCase(Locale.FRENCH) + "||";
+
         // La conversation contient l'historique des questions-réponses depuis le début.
         afficherConversation();
         return null;

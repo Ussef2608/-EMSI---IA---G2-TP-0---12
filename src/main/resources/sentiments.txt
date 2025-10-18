@@ -1,0 +1,70 @@
+merci,positif
+bien,positif
+heureux,positif
+heureuse,positif
+cool,positif
+parfait,positif
+parfaite,positif
+génial,positif
+géniale,positif
+content,positif
+contente,positif
+super,positif
+formidable,positif
+excellent,positif
+magnifique,positif
+satisfait,positif
+satisfaite,positif
+sympa,positif
+agréable,positif
+top,positif
+joyeux,positif
+joyeuse,positif
+motivé,positif
+motivée,positif
+bravo,positif
+félicitations,positif
+chouette,positif
+c’est bien,positif
+je vais bien,positif
+tout va bien,positif
+très bien,positif
+bonne journée,positif
+bon travail,positif
+parfaitement,positif
+plein d’énergie,positif
+
+triste,negatif
+tristes,negatif
+mal,negatif
+mauvais,negatif
+mauvaise,negatif
+fatigué,negatif
+fatiguée,negatif
+épuisé,negatif
+épuisée,negatif
+énervé,negatif
+énervée,negatif
+déçu,negatif
+déçue,negatif
+fâché,negatif
+fâchée,negatif
+mécontent,negatif
+mécontente,negatif
+désespéré,negatif
+désespérée,negatif
+malheureux,negatif
+malheureuse,negatif
+stressé,negatif
+stressée,negatif
+angoissé,negatif
+angoissée,negatif
+très fatigué,negatif
+je vais mal,negatif
+ça ne va pas,negatif
+pas bien,negatif
+horrible,negatif
+nul,negatif
+nulle,negatif
+déprimé,negatif
+déprimée,negatif
