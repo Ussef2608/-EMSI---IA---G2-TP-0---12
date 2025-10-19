@@ -160,12 +160,18 @@ public class Bb implements Serializable {
         String texte = question.toLowerCase(Locale.FRENCH);
         boolean positifTrouve = false;
         boolean negatifTrouve = false;
+        boolean motInconnu = true;
 
         for (String mot : texte.split("\\s+")) {
             mot = mot.replaceAll("[^a-zàâçéèêëîïôûùüÿñæœ]", "").trim();
             if (mot.isEmpty()) continue;
 
             String sentiment = sentiments.get(mot);
+            if (sentiment == null) {
+                continue;
+            } else {
+                motInconnu = false;
+            }
             if ("positif".equals(sentiment)) {
                 positifTrouve = true;
             } else if ("negatif".equals(sentiment)) {
@@ -179,9 +185,10 @@ public class Bb implements Serializable {
             this.reponse = "😔 Votre message semble négatif.";
         } else if (positifTrouve && negatifTrouve) {
             this.reponse = "😐 Votre message contient à la fois des mots positifs et négatifs.";
-        } else {
-            this.reponse = "😐 Votre message semble neutre.";
+        } else{
+            this.reponse = "🤔 Aucun mot reconnu dans le dictionnaire.";
         }
+
         // --- Fin du traitement personnalisé corrigé ---
 
         // Si la conversation n'a pas encore commencé, ajouter le rôle système au début de la réponse
@@ -192,7 +199,7 @@ public class Bb implements Serializable {
             this.roleSystemeChangeable = false;
         }
 
-        // La conversation contient l'historique des questions-réponses depuis le début.
+        // La conversation contient l'historique des questions réponses depuis le début.
         afficherConversation();
         return null;
     }
@@ -200,7 +207,7 @@ public class Bb implements Serializable {
     /**
      * Pour un nouveau chat.
      * Termine la portée view en retournant "index" (la page index.xhtml sera affichée après le traitement
-     * effectué pour construire la réponse) et pas null. null aurait indiqué de rester dans la même page (index.xhtml)
+     * effectué pour construire la réponse) et pas null. Null aurait indiqué de rester dans la même page (index.xhtml)
      * sans changer de vue.
      * Le fait de changer de vue va faire supprimer l'instance en cours du backing bean par CDI et donc on reprend
      * tout comme au début puisqu'une nouvelle instance du backing va être utilisée par la page index.xhtml.
@@ -226,7 +233,7 @@ public class Bb implements Serializable {
                     You are a helpful assistant. You help the user to find the information they need.
                     If the user type a question, you answer it.
                     """;
-            // 1er argument : la valeur du rôle, 2ème argument : le libellé du rôle
+            // 1er argument : la valeur du rôle, 2ième argument : le libellé du rôle
             this.listeRolesSysteme.add(new SelectItem(role, "Assistant"));
 
             role = """
