@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Backing bean pour la page JSF index.xhtml.
@@ -58,10 +56,10 @@ public class Bb implements Serializable {
     private StringBuilder conversation = new StringBuilder();
 
     /**
-     * Listes dynamiques des mots positifs et négatifs chargés depuis le fichier sentiments.txt.
+     * Dictionnaire des mots et de leur sentiment (clé = mot, valeur = "positif" ou "negatif").
+     * Utilisation d'une Map
      */
-    private List<String> positifs = new ArrayList<>();
-    private List<String> negatifs = new ArrayList<>();
+    private Map<String, String> sentiments = new HashMap<>();
 
     /**
      * Contexte JSF. Utilisé pour qu'un message d'erreur s'affiche dans le formulaire.
@@ -90,17 +88,13 @@ public class Bb implements Serializable {
                 if (parts.length == 2) {
                     String mot = parts[0].trim().toLowerCase(Locale.FRENCH);
                     String sentiment = parts[1].trim().toLowerCase(Locale.FRENCH);
-                    if (sentiment.equals("positif")) {
-                        positifs.add(mot);
-                    } else if (sentiment.equals("negatif")) {
-                        negatifs.add(mot);
-                    }
+                    sentiments.put(mot, sentiment);
                 }
             }
-            System.out.println("✅ Fichier sentiments.txt chargé : " + positifs.size() + " mots positifs, " + negatifs.size() + " négatifs.");
+            System.out.println(" Fichier sentiments.txt chargé : " + sentiments.size() + " mots.");
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
-            System.err.println("⚠️ Erreur lors du chargement du fichier sentiments.txt");
+            System.err.println(" Erreur lors du chargement du fichier sentiments.txt");
         }
     }
 
@@ -162,7 +156,7 @@ public class Bb implements Serializable {
             return null;
         }
 
-        // Mon traitement personnalisé
+        // Mon traitement personnalisé corrigé
         String texte = question.toLowerCase(Locale.FRENCH);
         boolean positifTrouve = false;
         boolean negatifTrouve = false;
@@ -171,9 +165,10 @@ public class Bb implements Serializable {
             mot = mot.replaceAll("[^a-zàâçéèêëîïôûùüÿñæœ]", "").trim();
             if (mot.isEmpty()) continue;
 
-            if (positifs.contains(mot)) {
+            String sentiment = sentiments.get(mot);
+            if ("positif".equals(sentiment)) {
                 positifTrouve = true;
-            } else if (negatifs.contains(mot)) {
+            } else if ("negatif".equals(sentiment)) {
                 negatifTrouve = true;
             }
         }
@@ -187,7 +182,7 @@ public class Bb implements Serializable {
         } else {
             this.reponse = "😐 Votre message semble neutre.";
         }
-        // --- Fin du traitement personnalisé ---
+        // --- Fin du traitement personnalisé corrigé ---
 
         // Si la conversation n'a pas encore commencé, ajouter le rôle système au début de la réponse
         if (this.conversation.isEmpty()) {
